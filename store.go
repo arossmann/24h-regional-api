@@ -3,7 +3,7 @@ package main
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type Store struct {
-	ID                 primitive.ObjectID
+	ID                 primitive.ObjectID `bson:"_id" json:"id,omitempty"`
 	Name     string   `json:"name"`
 	Gps      Gps      `json:"gps"`
 	Location Location `json:"location"`

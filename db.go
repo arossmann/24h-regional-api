@@ -8,7 +8,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
@@ -19,15 +18,12 @@ import (
 const (
 	// Timeout operations after N seconds
 	connectTimeout           = 5
-	connectionStringTemplate = "mongodb://%s:%s@%s"
+	connectionStringTemplate = "mongodb+srv://%s:%s@%s"
 )
 
 // GetConnection - Retrieves a client to the DocumentDB
 func getConnection() (*mongo.Client, context.Context, context.CancelFunc) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+
 	username := os.Getenv("MONGODB_USERNAME")
 	password := os.Getenv("MONGODB_PASSWORD")
 	clusterEndpoint := os.Getenv("MONGODB_ENDPOINT")
@@ -100,6 +96,26 @@ func GetStoreByID(id primitive.ObjectID) (*Store, error) {
 	log.Printf("Store: %v", store)
 	return store, nil
 }
+
+/*func GetProducts()([]string, error){
+	var products = []string
+	configDatabase := os.Getenv("MONGODB_DATABASE")
+	configCollection := os.Getenv("MONGODB_COLLECTION")
+	client, ctx, cancel := getConnection()
+	defer cancel()
+	defer client.Disconnect(ctx)
+	db := client.Database(configDatabase)
+	collection := db.Collection(configCollection)
+	result, err := collection.Distinct(ctx,"products", bson.D{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, value := range result {
+		fmt.Println(value)
+	}
+	return result, nil
+
+}*/
 
 func Create(store *Store) (primitive.ObjectID, error) {
 	configDatabase := os.Getenv("MONGODB_DATABASE")

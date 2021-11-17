@@ -1,6 +1,8 @@
 DOCKER_IMAGE_VERSION=0.1
 DOCKER_IMAGE_NAME=24h-regional-api
 DOCKER_IMAGE_TAGNAME=$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_VERSION)
+PORT_IN=8888
+PORT_OUT=8888
 
 default: build ## default = build
 
@@ -17,7 +19,7 @@ rmi: ## remove the image
 rebuild: rmi build ## rebuild it
 
 run: ## run the image
-	docker run -d -p 8088:8080 $(DOCKER_IMAGE_NAME):latest
+	docker run --env-file=.env -d -p  $(PORT_OUT):$(PORT_IN) $(DOCKER_IMAGE_NAME):latest
 
 help: ## This help dialog
 	@IFS=$$'\n' ; \

@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -82,25 +83,38 @@ func handleDeleteStore(c *gin.Context){
 	c.JSON(http.StatusOK, gin.H{"task:": savedStore})
 }
 
+func HealthGet(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"status": "UP",
+	})
+}
+
 func main() {
 	r := gin.Default()
-	r.GET("/stores/:id", handleGetStore)
+	/*r.GET("/stores/:id", handleGetStore)
 	r.GET("/stores/", handleGetStores)
 	r.PUT("/stores/", handleCreateStore)
-	r.POST("/stores/", handleUpdateStore)
-	r.Run()
-
+	r.POST("/stores/", handleUpdateStore)*/
 
 	v1 := r.Group("/api/v1")
 	{
+		health := v1.Group("/health")
+		{
+			health.GET("", HealthGet)
+		}
+		/*location := v1.Group("/location")
+		{
+			location.GET(":address",handleGetGeoLocationFromAddress)
+		}*/
 		stores := v1.Group("/stores")
 		{
 			stores.GET(":id", handleGetStore)
 			stores.GET("", handleGetStores)
 			stores.POST("", handleCreateStore)
 			stores.DELETE(":id", handleDeleteStore)
-			stores.PATCH(":id", handleUpdateStore)
+			stores.PUT(":id", handleUpdateStore)
 
 		}
 	}
+	r.Run(":"+os.Getenv("PORT"))
 }
