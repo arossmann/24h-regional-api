@@ -1,11 +1,15 @@
 package main
 
 import (
+	"github.com/arossmann/24h-regional-api/db"
+	_ "github.com/arossmann/24h-regional-api/docs/regional24h_api"
+	"github.com/arossmann/24h-regional-api/entity"
+	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/gin-gonic/gin"
 )
 
 func handleGetStores(c *gin.Context) {
@@ -16,7 +20,7 @@ func handleGetStores(c *gin.Context) {
 	stores = append(stores, store)
 	c.JSON(http.StatusOK, gin.H{"stores": stores}) */
 
-	var loadedStores, err = GetAllStores()
+	var loadedStores, err = db.GetAllStores()
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"msg": err})
 		return
@@ -25,12 +29,12 @@ func handleGetStores(c *gin.Context) {
 }
 
 func handleGetStore(c *gin.Context) {
-	var store Store
+	var store entity.Store
 	if err := c.BindUri(&store); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err})
 		return
 	}
-	var loadedStore, err = GetStoreByID(store.ID)
+	var loadedStore, err = db.GetStoreByID(store.ID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"msg": err})
 		return
@@ -39,13 +43,13 @@ func handleGetStore(c *gin.Context) {
 }
 
 func handleCreateStore(c *gin.Context) {
-	var store Store
+	var store entity.Store
 	if err := c.ShouldBindJSON(&store); err != nil {
 		log.Print(err)
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err})
 		return
 	}
-	id, err := Create(&store)
+	id, err := db.Create(&store)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": err})
 		return
@@ -54,13 +58,13 @@ func handleCreateStore(c *gin.Context) {
 }
 
 func handleUpdateStore(c *gin.Context) {
-	var store Store
+	var store entity.Store
 	if err := c.ShouldBindJSON(&store); err != nil {
 		log.Print(err)
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err})
 		return
 	}
-	savedStore, err := Update(&store)
+	savedStore, err := db.Update(&store)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": err})
 		return
@@ -69,13 +73,13 @@ func handleUpdateStore(c *gin.Context) {
 }
 
 func handleDeleteStore(c *gin.Context){
-	var store Store
+	var store entity.Store
 	if err := c.ShouldBindJSON(&store); err != nil {
 		log.Print(err)
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err})
 		return
 	}
-	savedStore, err := Update(&store)
+	savedStore, err := db.Update(&store)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": err})
 		return
@@ -83,18 +87,38 @@ func handleDeleteStore(c *gin.Context){
 	c.JSON(http.StatusOK, gin.H{"task:": savedStore})
 }
 
+// HealthCheck godoc
+// @Summary Show the status of server.
+// @Description get the status of server.
+// @Tags root
+// @Accept */*
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router / [get]
 func HealthGet(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status": "UP",
 	})
 }
 
+// @title 24h Regional API
+// @version 1.0
+// @description API for 24h-regional.de
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8888
+// @BasePath /api/v1
+// @schemes http
+
 func main() {
 	r := gin.Default()
-	/*r.GET("/stores/:id", handleGetStore)
-	r.GET("/stores/", handleGetStores)
-	r.PUT("/stores/", handleCreateStore)
-	r.POST("/stores/", handleUpdateStore)*/
 
 	v1 := r.Group("/api/v1")
 	{
@@ -115,6 +139,8 @@ func main() {
 			stores.PUT(":id", handleUpdateStore)
 
 		}
+		url := ginSwagger.URL("http://localhost:"+os.Getenv("PORT")+"/swagger/doc.json") // The url pointing to API definition
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 	}
 	r.Run(":"+os.Getenv("PORT"))
 }

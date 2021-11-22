@@ -1,18 +1,20 @@
-package main
+package db
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/arossmann/24h-regional-api/entity"
 	"log"
 	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	_ "github.com/arossmann/24h-regional-api/entity"
 )
 
 const (
@@ -52,8 +54,8 @@ func getConnection() (*mongo.Client, context.Context, context.CancelFunc) {
 	return client, ctx, cancel
 }
 
-func GetAllStores() ([]*Store, error) {
-	var stores []*Store
+func GetAllStores() ([]*entity.Store, error) {
+	var stores []*entity.Store
 	configDatabase := os.Getenv("MONGODB_DATABASE")
 	configCollection := os.Getenv("MONGODB_COLLECTION")
 	client, ctx, cancel := getConnection()
@@ -74,8 +76,8 @@ func GetAllStores() ([]*Store, error) {
 	return stores, nil
 }
 
-func GetStoreByID(id primitive.ObjectID) (*Store, error) {
-	var store *Store
+func GetStoreByID(id primitive.ObjectID) (*entity.Store, error) {
+	var store *entity.Store
 
 	configDatabase := os.Getenv("MONGODB_DATABASE")
 	configCollection := os.Getenv("MONGODB_COLLECTION")
@@ -117,7 +119,7 @@ func GetStoreByID(id primitive.ObjectID) (*Store, error) {
 
 }*/
 
-func Create(store *Store) (primitive.ObjectID, error) {
+func Create(store *entity.Store) (primitive.ObjectID, error) {
 	configDatabase := os.Getenv("MONGODB_DATABASE")
 	configCollection := os.Getenv("MONGODB_COLLECTION")
 
@@ -135,8 +137,8 @@ func Create(store *Store) (primitive.ObjectID, error) {
 	return oid, nil
 }
 
-func Update(store *Store) (*Store, error) {
-	var updatedStore *Store
+func Update(store *entity.Store) (*entity.Store, error) {
+	var updatedStore *entity.Store
 
 	configDatabase := os.Getenv("MONGODB_DATABASE")
 	configCollection := os.Getenv("MONGODB_COLLECTION")
