@@ -2,16 +2,21 @@ package main
 
 import (
 	"github.com/arossmann/24h-regional-api/db"
-	_ "github.com/arossmann/24h-regional-api/docs/regional24h_api"
 	"github.com/arossmann/24h-regional-api/entity"
 	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 	"net/http"
 	"os"
 )
 
+// Get All Stores godoc
+// @Summary returns the list of all stores
+// @Description get the list of all stores.
+// @Tags root
+// @Accept */*
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router /api/v1/stores/ [get]
 func handleGetStores(c *gin.Context) {
 	/* var stores []Store
 	var store Store
@@ -94,7 +99,7 @@ func handleDeleteStore(c *gin.Context){
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
-// @Router / [get]
+// @Router /api/v1/swagger/ [get]
 func HealthGet(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status": "UP",
@@ -106,9 +111,9 @@ func HealthGet(c *gin.Context) {
 // @description API for 24h-regional.de
 // @termsOfService http://swagger.io/terms/
 
-// @contact.name API Support
-// @contact.url http://www.swagger.io/support
-// @contact.email support@swagger.io
+// @contact.name Arne Rossmann
+// @contact.url http://24h-regional.de
+// @contact.email arne.rossmann@gmail.com
 
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
@@ -139,8 +144,6 @@ func main() {
 			stores.PUT(":id", handleUpdateStore)
 
 		}
-		url := ginSwagger.URL("http://localhost:"+os.Getenv("PORT")+"/swagger/doc.json") // The url pointing to API definition
-		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 	}
 	r.Run(":"+os.Getenv("PORT"))
 }
