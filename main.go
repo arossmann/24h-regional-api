@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/arossmann/24h-regional-api/store"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"log"
 	"os"
 )
@@ -25,6 +26,14 @@ func setupRoutes(app *fiber.App) {
 
 func main() {
 	app := fiber.New()
+	// Default config
+	app.Use(cors.New())
+
+	// Or extend your config for customization
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowHeaders: "Origin, Content-Type, Accept",
+	}))
 	setupRoutes(app)
 	log.Fatal(app.Listen(":" + os.Getenv("PORT")))
 
