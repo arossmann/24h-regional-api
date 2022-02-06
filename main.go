@@ -2,16 +2,16 @@ package main
 
 import (
 	"github.com/arossmann/24h-regional-api/store"
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 	"log"
 	"os"
 )
 
-func HealthGet(c *fiber.Ctx) {
-	c.Send("status: UP")
+func HealthGet(c *fiber.Ctx) error {
+	return c.SendString("status: UP")
 }
-func baseRoute(c *fiber.Ctx) {
-	c.Send("API can be found at /api/v1")
+func baseRoute(c *fiber.Ctx) error {
+	return c.SendString("API can be found at /api/v1")
 }
 
 func setupRoutes(app *fiber.App) {

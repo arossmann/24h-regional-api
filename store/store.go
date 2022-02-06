@@ -3,28 +3,28 @@ package store
 import (
 	"github.com/arossmann/24h-regional-api/db"
 	"github.com/arossmann/24h-regional-api/entity"
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 )
 
-func GetStores(c *fiber.Ctx) {
+func GetStores(c *fiber.Ctx) error {
 	var loadedStores, _ = db.GetAllStores()
-	c.JSON(loadedStores)
+	return c.JSON(loadedStores)
 }
 
-func GetStore(c *fiber.Ctx) {
+func GetStore(c *fiber.Ctx) error {
 	var store entity.Store
 	var loadedStore, _ = db.GetStoreByID(store.ID)
-	c.JSON(loadedStore)
+	return c.JSON(loadedStore)
 }
 
-func NewStore(c *fiber.Ctx) {
+func NewStore(c *fiber.Ctx) error {
 	var store entity.Store
 	id, _ := db.Create(&store)
-	c.JSON(id)
+	return c.JSON(id)
 }
 
-func DeleteStore(c *fiber.Ctx) {
+func DeleteStore(c *fiber.Ctx) error {
 	var store entity.Store
 	savedStore, _ := db.Update(&store)
-	c.JSON(savedStore)
+	return c.JSON(savedStore)
 }
