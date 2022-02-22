@@ -38,7 +38,7 @@ General endpoint is _$(DOMAIN):$(PORT)
 | GET     | "/api/v1/stores/:id" | [link](#get-single-store-by-id) |
 | POST    | "/api/v1/stores"     | [link](#add-store)              |
 | DELETE  | "/api/v1/stores/:id" | [link](#delete-store-by-id)     |
-
+| PUT     | "/api/v1/stores/:id" | [link](#update-store)           |
 
 ### Health
 
@@ -52,7 +52,7 @@ General endpoint is _$(DOMAIN):$(PORT)
 ```
 * Example: 
 ```
-curl --location --request GET 'https://api.24h-regional.de/health/'
+curl --location --request GET 'https://$DOMAIN:$PORT/health/'
 status: UP
 ```
 
@@ -85,7 +85,7 @@ status: UP
 
 * Example:
 ```
-curl --location --request GET 'https://api.24h-regional.de/api/v1/stores/
+curl --location --request GET 'https://$DOMAIN:$PORT/api/v1/stores/
 [
     {
         "name": "Regio Box Wetzendorf",
@@ -139,7 +139,7 @@ curl --location --request GET 'https://api.24h-regional.de/api/v1/stores/
 
 * Example:
 ```
-curl --location --request GET 'https://api.24h-regional.de/api/v1/stores/621001e6c372b2c05fce1c2e'
+curl --location --request GET 'https://$DOMAIN:$PORT/api/v1/stores/621001e6c372b2c05fce1c2e'
 {
     "id": "621001e6c372b2c05fce1c2e",
     "name": "Hornig GbR",
@@ -262,4 +262,80 @@ Deletion of Store with ID $id: successful
 ```
 curl --location --request DELETE 'https://$DOMAIN:$PORT/api/v1/stores/6214f9ea4836827453678c14'
 Deletion of Store with ID 6214f9ea4836827453678c14: successful
+```
+
+### Update Store
+
+* Endpoint: _$(DOMAIN):$(PORT)/api/v1/stores/:id
+* Method: PUT
+* Request:
+
+```
+[
+    {
+            "name": string,
+            "open": string,
+            "gps": {
+                "latitude": long,
+                "longitude": long
+            },
+            "location": {
+                "street": string,
+                "zip": string,
+                "city": string,
+                "country": string
+            },
+            "products": []string,
+            "source": string
+    }
+]
+```
+
+* Response
+```
+{
+        "id: string,
+        "name": string,
+        "open": string,
+        "gps": {
+            "latitude": long,
+            "longitude": long
+        },
+        "location": {
+            "street": string,
+            "zip": string,
+            "city": string,
+            "country": string
+        },
+        "products": []string,
+        "source": string
+}
+```
+
+* Example:
+```
+curl --location --request POST 'https://$DOMAIN:$PORT/api/v1/stores/$ID' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+        "name": "Regio Box Wetzendorf",
+        "open": "24h",
+        "gps": {
+            "latitude": 49.47177986951858,
+            "longitude": 11.037174273016173
+        },
+        "location": {
+            "street": "Wetzendorfer Straße 278",
+            "zip": "90427",
+            "city": "Nürnberg",
+            "country": "Germany"
+        },
+        "products": [
+            "Eier",
+            "Nudeln",
+            "Gemüse",
+            "Apfelmus",
+            "Kaffee"
+        ],
+        "source":""
+    }'
 ```

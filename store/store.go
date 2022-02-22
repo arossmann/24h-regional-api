@@ -22,3 +22,7 @@ func NewStore(c *fiber.Ctx) error {
 func DeleteStore(c *fiber.Ctx) error {
 	return db.Delete(c)
 }
+
+func UpdateStore(c *fiber.Ctx) error {
+	return db.Update(c)
+}

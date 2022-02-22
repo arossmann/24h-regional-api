@@ -157,28 +157,29 @@ func Update(c *fiber.Ctx) error {
 		return c.Status(400).SendString(err.Error())
 	}
 
-	// Find the employee and update its data
-	query := bson.D{{Key: "_id", Value: storeID}}
-	update := bson.D{
-		{Key: "$set",
-			Value: bson.D{
-				{Key: "name", Value: store.Name},
-				{Key: "open", Value: store.Open},
-				{Key: "products", Value: store.Products},
-			},
-		},
+	pByte, err := bson.Marshal(store)
+	if err != nil {
+		return err
 	}
-	err = client.Database(configDatabase).Collection(configCollection).FindOneAndUpdate(c.Context(), query, update).Err()
 
+	var update bson.M
+	err = bson.Unmarshal(pByte, &update)
+	if err != nil {
+		return err
+	}
+
+	// Find the store and update its data
+	query := bson.D{{Key: "_id", Value: storeID}}
+	err = client.Database(configDatabase).Collection(configCollection).FindOneAndUpdate(c.Context(), query, bson.D{{Key: "$set", Value: update}}).Err()
 	if err != nil {
 		// ErrNoDocuments means that the filter did not match any documents in the collection
 		if err == mongo.ErrNoDocuments {
 			return c.SendStatus(404)
 		}
-		return c.SendStatus(500)
+		return c.Status(500).SendString(err.Error())
 	}
 
-	// return the updated employee
+	// return the updated store
 	store.ID = idParam
 	return c.Status(200).JSON(store)
 }

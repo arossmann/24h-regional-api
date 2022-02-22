@@ -22,6 +22,7 @@ func setupRoutes(app *fiber.App) {
 	app.Get("/api/v1/stores/:id", store.GetStore)
 	app.Post("/api/v1/stores", store.NewStore)
 	app.Delete("/api/v1/stores/:id", store.DeleteStore)
+	app.Put("/api/v1/stores/:id", store.UpdateStore)
 }
 
 func main() {
