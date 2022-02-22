@@ -30,28 +30,22 @@ func getConnection() (*mongo.Client, context.Context, context.CancelFunc) {
 	username := os.Getenv("MONGODB_USERNAME")
 	password := os.Getenv("MONGODB_PASSWORD")
 	clusterEndpoint := os.Getenv("MONGODB_ENDPOINT")
-
 	connectionURI := fmt.Sprintf(connectionStringTemplate, username, password, clusterEndpoint)
-	//fmt.Println("Mongo Connection: " + connectionURI)
+
 	client, err := mongo.NewClient(options.Client().ApplyURI(connectionURI))
 	if err != nil {
 		log.Printf("Failed to create client: %v", err)
 	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), connectTimeout*time.Second)
-
 	err = client.Connect(ctx)
 	if err != nil {
 		log.Printf("Failed to connect to cluster: %v", err)
 	}
-
 	// Force a connection to verify our connection string
 	err = client.Ping(ctx, nil)
 	if err != nil {
 		log.Printf("Failed to ping cluster: %v", err)
 	}
-
-	fmt.Println("Connected to MongoDB!")
 	return client, ctx, cancel
 }
 
@@ -138,7 +132,7 @@ func Delete(c *fiber.Ctx) error {
 	if result.DeletedCount < 1 {
 		return c.SendStatus(404)
 	}
-	return c.SendStatus(204)
+	return c.Status(201).SendString("Deletion of Store with ID " + c.Params("id") + ": successful")
 }
 
 func Update(c *fiber.Ctx) error {
