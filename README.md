@@ -26,6 +26,9 @@ make run
         "source": string
 }
 ```
+An example can be seen in the following graphic:
+
+![data structure](./images/datastructure.png)
 
 ## API Endpoints
 
