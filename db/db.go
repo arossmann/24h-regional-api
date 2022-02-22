@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/arossmann/24h-regional-api/entity"
+	"github.com/gofiber/fiber/v2"
 	"log"
 	"os"
 	"time"
@@ -76,90 +77,114 @@ func GetAllStores() ([]*entity.Store, error) {
 	return stores, nil
 }
 
-func GetStoreByID(id primitive.ObjectID) (*entity.Store, error) {
+func GetStoreByID(id string) (*entity.Store, error) {
 	var store *entity.Store
-
 	configDatabase := os.Getenv("MONGODB_DATABASE")
 	configCollection := os.Getenv("MONGODB_COLLECTION")
 	client, ctx, cancel := getConnection()
 	defer cancel()
 	defer client.Disconnect(ctx)
-	db := client.Database(configDatabase)
-	collection := db.Collection(configCollection)
-	result := collection.FindOne(ctx, bson.D{})
+	collection := client.Database(configDatabase).Collection(configCollection)
+	objectId, _ := primitive.ObjectIDFromHex(id)
+	result := collection.FindOne(ctx, bson.M{"_id": objectId})
 	if result == nil {
-		return nil, errors.New("Could not find a store")
+		return nil, errors.New("could not find a store")
 	}
 	err := result.Decode(&store)
 	if err != nil {
 		log.Printf("Failed marshalling %v", err)
 		return nil, err
 	}
-	log.Printf("Store: %v", store)
 	return store, nil
 }
 
-/*func GetProducts()([]string, error){
-	var products = []string
+func Create(c *fiber.Ctx) error {
 	configDatabase := os.Getenv("MONGODB_DATABASE")
 	configCollection := os.Getenv("MONGODB_COLLECTION")
 	client, ctx, cancel := getConnection()
 	defer cancel()
 	defer client.Disconnect(ctx)
-	db := client.Database(configDatabase)
-	collection := db.Collection(configCollection)
-	result, err := collection.Distinct(ctx,"products", bson.D{})
+	newStore := new(entity.Store)
+	if err := c.BodyParser(newStore); err != nil {
+		return c.Status(400).SendString(err.Error())
+	}
+	// force creation of new ObjectID
+	newStore.ID = ""
+	insertionResult, err := client.Database(configDatabase).Collection(configCollection).InsertOne(c.Context(), newStore)
 	if err != nil {
-		log.Fatal(err)
+		return c.Status(500).SendString(err.Error())
 	}
-	for _, value := range result {
-		fmt.Println(value)
-	}
-	return result, nil
-
-}*/
-
-func Create(store *entity.Store) (primitive.ObjectID, error) {
+	filter := bson.D{{Key: "_id", Value: insertionResult.InsertedID}}
+	createdRecord := client.Database(configDatabase).Collection(configCollection).FindOne(c.Context(), filter)
+	createdStore := &entity.Store{}
+	createdRecord.Decode(createdStore)
+	return c.Status(201).JSON(createdStore)
+}
+func Delete(c *fiber.Ctx) error {
 	configDatabase := os.Getenv("MONGODB_DATABASE")
 	configCollection := os.Getenv("MONGODB_COLLECTION")
-
 	client, ctx, cancel := getConnection()
 	defer cancel()
 	defer client.Disconnect(ctx)
-	store.ID = primitive.NewObjectID()
-
-	result, err := client.Database(configDatabase).Collection(configCollection).InsertOne(ctx, store)
+	storeID, err := primitive.ObjectIDFromHex(c.Params("id"))
 	if err != nil {
-		log.Printf("could not create store: %v", err)
-		return primitive.NilObjectID, err
+		return c.SendStatus(400)
 	}
-	oid := result.InsertedID.(primitive.ObjectID)
-	return oid, nil
+	query := bson.D{{Key: "_id", Value: storeID}}
+	result, err := client.Database(configDatabase).Collection(configCollection).DeleteOne(c.Context(), query)
+	if err != nil {
+		return c.SendStatus(500)
+	}
+	if result.DeletedCount < 1 {
+		return c.SendStatus(404)
+	}
+	return c.SendStatus(204)
 }
 
-func Update(store *entity.Store) (*entity.Store, error) {
-	var updatedStore *entity.Store
-
+func Update(c *fiber.Ctx) error {
 	configDatabase := os.Getenv("MONGODB_DATABASE")
 	configCollection := os.Getenv("MONGODB_COLLECTION")
 
 	client, ctx, cancel := getConnection()
 	defer cancel()
 	defer client.Disconnect(ctx)
-	update := bson.M{
-		"$set": store,
-	}
-	upsert := true
-	after := options.After
-	opt := options.FindOneAndUpdateOptions{
-		Upsert:         &upsert,
-		ReturnDocument: &after,
+
+	idParam := c.Params("id")
+	storeID, err := primitive.ObjectIDFromHex(idParam)
+
+	// the provided ID might be invalid ObjectID
+	if err != nil {
+		return c.SendStatus(400)
 	}
 
-	err := client.Database(configDatabase).Collection(configCollection).FindOneAndUpdate(ctx, bson.M{"_id": store.ID}, update, &opt).Decode(&updatedStore)
-	if err != nil {
-		log.Printf("Could not save Store: %v", err)
-		return nil, err
+	store := new(entity.Store)
+	// Parse body into struct
+	if err := c.BodyParser(store); err != nil {
+		return c.Status(400).SendString(err.Error())
 	}
-	return updatedStore, nil
+
+	// Find the employee and update its data
+	query := bson.D{{Key: "_id", Value: storeID}}
+	update := bson.D{
+		{Key: "$set",
+			Value: bson.D{
+				{Key: "name", Value: store.Name},
+				{Key: "open", Value: store.Open},
+				{Key: "products", Value: store.Products},
+			},
+		},
+	}
+	err = client.Database(configDatabase).Collection(configCollection).FindOneAndUpdate(c.Context(), query, update).Err()
+
+	if err != nil {
+		// ErrNoDocuments means that the filter did not match any documents in the collection
+		if err == mongo.ErrNoDocuments {
+			return c.SendStatus(404)
+		}
+		return c.SendStatus(500)
+	}
+
+	// return the updated employee
+	store.ID = idParam
+	return c.Status(200).JSON(store)
 }
