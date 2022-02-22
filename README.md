@@ -37,7 +37,7 @@ General endpoint is _$(DOMAIN):$(PORT)
 | GET     | "/api/v1/stores"     | [link](#get-all-stores)         |
 | GET     | "/api/v1/stores/:id" | [link](#get-single-store-by-id) |
 | POST    | "/api/v1/stores"     | [link](#add-store)              |
-| DELETE  | "/api/v1/stores/:id" | [link](#get-single-store-by-id) |
+| DELETE  | "/api/v1/stores/:id" | [link](#delete-store-by-id)     |
 
 
 ### Health
