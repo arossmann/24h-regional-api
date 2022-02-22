@@ -37,6 +37,7 @@ General endpoint is _$(DOMAIN):$(PORT)
 | GET     | "/api/v1/stores"     | [link](#get-all-stores)         |
 | GET     | "/api/v1/stores/:id" | [link](#get-single-store-by-id) |
 | POST    | "/api/v1/stores"     | [link](#add-store)              |
+| DELETE  | "/api/v1/stores/:id" | [link](#get-single-store-by-id) |
 
 
 ### Health
@@ -167,6 +168,7 @@ curl --location --request GET 'https://api.24h-regional.de/api/v1/stores/621001e
     "source": "https://www.landkreis-fuerth.de/zuhause-im-landkreis/gutes/frische-regionale-produkte-aus-automaten.html"
 }
 ```
+
 ### Add Store
 
 * Endpoint: _$(DOMAIN):$(PORT)/api/v1/stores
@@ -243,4 +245,21 @@ curl --location --request POST 'https://$DOMAIN:$PORT/api/v1/stores/' \
         ],
         "source":""
     }'
+```
+
+
+### Delete store by ID
+
+* Endpoint: _$(DOMAIN):$(PORT)/api/v1/stores/:id
+* Method: DELETE
+* Response:
+
+```
+Deletion of Store with ID $id: successful
+```
+
+* Example:
+```
+curl --location --request DELETE 'https://$DOMAIN:$PORT/api/v1/stores/6214f9ea4836827453678c14'
+Deletion of Store with ID 6214f9ea4836827453678c14: successful
 ```
