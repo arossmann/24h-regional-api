@@ -3,7 +3,7 @@ module github.com/arossmann/24h-regional-api
 go 1.17
 
 require (
-	github.com/gofiber/fiber/v2 v2.27.0
+	github.com/gofiber/fiber/v2 v2.28.0
 	go.mongodb.org/mongo-driver v1.8.3
 )
 
