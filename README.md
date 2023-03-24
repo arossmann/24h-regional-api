@@ -2,6 +2,11 @@
 
 ## Build & local run
 
+- copy the .env.template file to your own file and adopt the content
+```
+cp .env.template .env
+```
+- build and run the API via Docker
 ```
 make build
 make run
