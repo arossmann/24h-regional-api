@@ -24,3 +24,6 @@
 
 # binaries
 cmd/*
+
+# mongo store
+mongo-data

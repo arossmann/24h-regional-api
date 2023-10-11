@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/arossmann/24h-regional-api/entity"
-	"github.com/gofiber/fiber/v2"
 	"log"
 	"os"
 	"time"
+
+	"github.com/arossmann/24h-regional-api/entity"
+	"github.com/gofiber/fiber/v2"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -21,7 +22,7 @@ import (
 const (
 	// Timeout operations after N seconds
 	connectTimeout           = 5
-	connectionStringTemplate = "mongodb+srv://%s:%s@%s"
+	connectionStringTemplate = "mongodb://%s:%s@%s:27017/?authSource=admin"
 )
 
 // GetConnection - Retrieves a client to the DocumentDB
@@ -31,7 +32,7 @@ func getConnection() (*mongo.Client, context.Context, context.CancelFunc) {
 	password := os.Getenv("MONGODB_PASSWORD")
 	clusterEndpoint := os.Getenv("MONGODB_ENDPOINT")
 	connectionURI := fmt.Sprintf(connectionStringTemplate, username, password, clusterEndpoint)
-
+	fmt.Println(connectionURI)
 	client, err := mongo.NewClient(options.Client().ApplyURI(connectionURI))
 	if err != nil {
 		log.Printf("Failed to create client: %v", err)
